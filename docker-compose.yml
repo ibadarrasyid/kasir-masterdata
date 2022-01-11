@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  mysql:
+    container_name: "dbkasir"
+    image: mysql:5.7.36
+    volumes:
+      - ./scripts/user.sql:/docker-entrypoint-initdb.d/user.sql
+      - ./db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: ibad_kasir
+      MYSQL_USER: root
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3306:3306"
+  phpmyadmin:
+    container_name: "phpmyadmin"
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: admin
+    ports:
+      - "8081:80"
+    links:
+      - mysql
+  ciapp:
+    container_name: "appkasir"
+    build: ./ciapp
+    volumes: 
+      - ./ciapp:/var/www/html/
+    depends_on:
+       - mysql
+    restart: always
+    links:
+      - mysql
+    ports:
+      - "8080:80"
+
+volumes:
+    db_data:
